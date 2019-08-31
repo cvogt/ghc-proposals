@@ -292,9 +292,9 @@ Lifting these restrictions would have consequences that were not fully evaluated
        { f :: fsig,
          g :: gsig }
 
-    Note that the field types ``fsig`` and ``gsig`` correspond exactly to the
-    class method types. Reordering or changing the visibility of class
-    variables maintains this property, while adding new variables does not.
+   Note that the field types ``fsig`` and ``gsig`` correspond exactly to the
+   class method types. Reordering or changing the visibility of class
+   variables maintains this property, while adding new variables does not.
 
 2. Not binding all of class variables would be akin to a violation of the
    "forall-or-nothing" rule. We can say that unmentioned class variables are
