@@ -209,7 +209,7 @@ Examples
 * Erroneous class method header that uses (as of yet) unsupported visible ``forall`` in terms::
 
     class C (a :: k) where
-      f @k @a :: P a
+      f @k a :: P a
 
     -- f :: forall k. forall a -> C (a :: k) => P a
 
