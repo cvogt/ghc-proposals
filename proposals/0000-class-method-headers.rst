@@ -21,7 +21,7 @@ We propose to allow class variable binders on the left of ``::`` in class method
 The ordering of these variables may differ from their ordering in the class declaration header.
 
 The syntax mirrors that of associated type headers and
-`Type variable binders <https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0155-type-lambda.rst>`_.
+`"Type variable binders" <https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0155-type-lambda.rst>`_.
 
 Motivation
 ------------
@@ -132,6 +132,13 @@ notion of a signature header::
 A validity check ensures that the binders are only used in class method
 signatures and are disallowed in function signatures.
 
+The syntax of function bindings, including method definitions in instances, is
+assumed to be extended by `"Type variable binders"
+<https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0155-type-lambda.rst>`_
+to allow type binders prefixed with ``@``::
+
+  f @Int x = ...
+
 Semantics
 ~~~~~~~~~
 
@@ -155,7 +162,7 @@ Semantics
   order and the (as of yet) unsupported visible ``forall``.
 
 * Class method definitions in instance declarations may explicitly write out
-  class variable instantiations::
+  instantiations of invisible class variables::
 
     class C a where
       f @a :: a
@@ -163,7 +170,32 @@ Semantics
     instance C Int where
       f @Int = 42
 
-  This mirrors the syntax of associated type definitions (associated type family equations).
+  This mirrors the syntax of associated type definitions (associated type
+  family equations).
+
+* The presence of a class method header is not observable outside the class
+  declaration::
+
+    class C a b where
+      f       :: a -> b
+      f @a @b :: a -> b  -- identical
+
+  A consequence of this is that class method definitions may bind class
+  variables regardless of the presence of a class method header in the class
+  declaration::
+
+    class C a where
+      f :: a         -- note: no @a
+
+    -- f :: forall a. C a => a
+
+    instance C Int where
+      f @Int = 42    -- still allowed
+
+* Class variables bound in methods must be identical to their occurrences in
+  the instance header, as is the case with associated types.
+
+* Class variables bound in methods always precede other arguments.
 
 Examples
 --------
@@ -224,6 +256,55 @@ Examples
   This is the same message as one would get if this signature was written by hand.
   The implementation may opt to provide a different error message in the same spirit.
 
+* Instance declaration where the method definition binds class variables::
+
+    class C a b where
+      f :: a -> b
+
+    -- f :: forall a b. C a b => a -> b
+
+    instance C Int Bool where
+      f @Int @Bool = even
+
+* Instance declaration where the method definition binds some, but not all of class variables::
+
+    class C a b where
+      f @a @b :: a -> b
+
+    -- f :: forall a b. C a b => a -> b
+
+    instance C Int Bool where
+      f @Int = even
+
+* Instance declaration where the method definition binds class variables in a different order::
+
+    class C a b where
+      f @b @a :: a -> b
+
+    -- f :: forall b a. C a b => a -> b
+
+    instance C Int Bool where
+      f @Bool @Int = even
+
+* Erroneous instance declaration where the class variable bound in a method definiton does not match::
+
+    class C a where
+      f @a :: a
+
+    instance C Int where
+      f @Bool = ...
+
+  Rejected with the following message::
+
+    • Type indexes must match class instance head
+      Expected: f @Int
+        Actual: f @Bool
+    • In the method definition for ‘f’
+      In the instance declaration for ‘C Int’
+
+  This is the same message as one would get for associated types.
+  The implementation may opt to provide a different error message in the same spirit.
+
 Effect and Interactions
 -----------------------
 
@@ -234,6 +315,31 @@ the ordering of class variable quantification in class methods for use with
 The long-term pay-off is that it offers syntax for visible quantification of
 class variables and represents one of the steps in the `Grand Class Unification
 <https://github.com/ghc-proposals/ghc-proposals/pull/236>`_  plan.
+
+
+Visible ``forall`` Extended Specification
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When/if visible ``forall`` in terms is allowed, class method definitions in
+instance declarations must explicitly write out visible class variable
+instantiations::
+
+  class C a where
+    type F a :: a
+    f a :: a
+
+  -- f :: forall a -> C a => a
+
+  instance C Bool where
+    type F Bool = True
+    f Bool = True
+
+That is, we write ``f Bool = ...`` rather than ``f = ...``. These bindings
+are a part of the left-hand side and cannot be lambda-bound::
+
+  instance C Bool where
+    f Bool = ...         -- correct
+    f = \ @Bool -> ...   -- error: the visible class variable is not bound on the left-hand side
 
 Limitations
 -----------
