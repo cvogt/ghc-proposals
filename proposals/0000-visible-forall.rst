@@ -235,11 +235,11 @@ use would have the least noise and good error messages::
 Eta-reduction is now possible::
 
   -- Valid code:
-  mySizeOf :: forall a. Sized a => Int
-  mySizeOf @a = sizeOf @a
+  mySizeOf :: forall a -> Sized a => Int
+  mySizeOf a = sizeOf a
 
   -- Eta-reduction attempt succeeds:
-  mySizeOf :: forall a. Sized a => Int
+  mySizeOf :: forall a -> Sized a => Int
   mySizeOf = sizeOf
 
 The proposed visible ``forall`` would be an irrelevant quantifier. However, if
