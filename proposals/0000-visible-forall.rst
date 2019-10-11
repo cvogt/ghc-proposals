@@ -387,9 +387,9 @@ Alternatives
 
 * To avoid the name resolution issues, we could introduce a syntactic marker to
   indicate visible type arguments. That is, for some ``f :: forall x
-  -> ...```, one would pass ``x`` as ``f ^x`` instead of ``f x``, where ``^``
-  is new syntax (and a different choice of symbols is possible). There are two
-  issues with this alternative:
+  -> ...``, one would pass ``x`` as ``f ^x`` instead of ``f x``, where ``^``
+  is new syntax (and a different choice of symbols is possible). There are
+  several issues with this alternative:
 
   * it creates more syntactic noise
   * it is inconsistent with what we have in types where we do not need a marker
