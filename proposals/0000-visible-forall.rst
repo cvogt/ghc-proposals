@@ -15,7 +15,7 @@ We propose to allow visible irrelevant dependent quantification, written as
 ``forall x ->``, in terms.
 
 NB. This proposal assumes that the `"Extend term-level lookup rules"
-<https://github.com/hithroc/ghc-proposals/blob/master/proposals/0000-term-lookup-rules.md>`_
+<https://github.com/ghc-proposals/ghc-proposals/pull/270>`_
 proposal has been accepted.
 
 Background
