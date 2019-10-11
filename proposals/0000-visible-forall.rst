@@ -1,5 +1,5 @@
-Visible ``forall`` in terms
-===========================
+Visible ``forall`` in types of terms
+====================================
 
 .. author:: Vladislav Zavialov
 .. date-accepted::
@@ -12,7 +12,7 @@ Visible ``forall`` in terms
 .. contents::
 
 We propose to allow visible irrelevant dependent quantification, written as
-``forall x ->``, in terms.
+``forall x ->``, in types of terms.
 
 NB. This proposal assumes that the `"Extend term-level lookup rules"
 <https://github.com/ghc-proposals/ghc-proposals/pull/270>`_
@@ -105,8 +105,8 @@ to specify an invisible parameter as if it was visible::
 
 Motivation
 ----------
-At the type level, we have the choice between invisible and visible dependent
-quantification::
+In types of types (in kinds), we have the choice between invisible and visible
+dependent quantification::
 
   type PInv :: forall k. k -> Type  -- invisible quantification of 'k'
   data PInv a = MkPInv
@@ -124,23 +124,23 @@ must be specified by the user::
 This means our quantifier grid is complete with regards to dependence and
 visibility::
 
-  Type-level
-  quantifiers     Dependent     Non-dependent
-               +--------------+---------------+
-      Visible  | forall a ->  |  a ->         |
-               +--------------+---------------+
-    Invisible  | forall a.    |  c =>         |
-               +--------------+---------------+
+  Quantifiers in
+  types of types    Dependent     Non-dependent
+                 +--------------+---------------+
+        Visible  | forall a ->  |  a ->         |
+                 +--------------+---------------+
+      Invisible  | forall a.    |  c =>         |
+                 +--------------+---------------+
 
-On the other hand, in terms, our grid is incomplete::
+On the other hand, in types of terms, our grid is incomplete::
 
-  Term-level
-  quantifiers     Dependent     Non-dependent
-               +--------------+---------------+
-      Visible  |              |  a ->         |
-               +--------------+---------------+
-    Invisible  | forall a.    |  c =>         |
-               +--------------+---------------+
+  Quantifiers in
+  types of terms    Dependent     Non-dependent
+                 +--------------+---------------+
+        Visible  |              |  a ->         |
+                 +--------------+---------------+
+      Invisible  | forall a.    |  c =>         |
+                 +--------------+---------------+
 
 Other than making terms and types more symmetrical, filling this empty cell
 would let us design better APIs without the use of proxy types or ambiguous
@@ -259,9 +259,9 @@ Proposed Change Specification
 * Add a new language extension, ``VisibleForAll``.
 
 * When ``VisibleForAll`` is in effect, lift the restriction that the ``forall a
-  ->`` quantifier cannot be used in terms.
+  ->`` quantifier cannot be used in types of terms.
 
-* In terms, ``forall a ->`` is an irrelevant quantifier.
+* In types of terms, ``forall a ->`` is an irrelevant quantifier.
 
 * Parsing and name resolution are not affected. Given ``f :: forall a -> t``,
   while ``x`` in ``f x`` is a type, it is parsed and renamed as a term, and
@@ -288,9 +288,8 @@ Proposed Change Specification
   * Type application ``f @a`` is reinterpeted as type-level type application
     ``f @a`` and requires the ``TypeApplications`` extension.
 
-  * Operators ``x + y * z`` are reinterpreted as type operators ``x + y * z``
-    and require the ``TypeOperators`` extension. However, since we rename this
-    as a term, we retain the fixities of term-level operators.
+  * Operator application ``x + y`` is reinterpreted as type-level operator
+    application ``x + y`` and requires the ``TypeOperators`` extension.
 
   * A type signature ``a :: t`` is reinterpreted as a kind signature ``a :: t``
     and requires the ``KindSignatures`` extension.
@@ -323,7 +322,7 @@ Meta: Term/Type Unification Policy
 Reinterpretation of terms as types is to be considered a transitional technique
 with the eventual goal of complete unification of terms and types. Hence, by
 accepting this proposal, we all agree that the term/type unification is The
-Right Thing. To facilitate this process, we establish a policy that changes
+Right Thing. To facilitate this process, we establish a policy that non-breaking changes
 that simply bridge the gap between terms and types (such as promotion of
 ``Char``, type-level ``if then else``, etc) do not require the proposal
 process. A merge request is eligible for this shortcut if at least two GHC
@@ -361,11 +360,27 @@ Use site::
 Effect and Interactions
 -----------------------
 
-* Visible ``forall`` becomes available in terms, making them more similar to
-  types. There remains a discrepancy that ``forall`` in types is actually a
+* Visible ``forall`` becomes available in types of terms, making them more similar to
+  types of types. There remains a discrepancy that ``forall`` for types is actually a
   relevant quantifier, while the proposed ``forall x ->`` for terms is
   irrelevant. This is to be resolved in the future by making type-level
   ``forall`` irrelevant.
+
+* The renaming of a visible dependent argument is different than that of a
+  dependent argument with a visibility override. Consider this code::
+
+    f :: forall a.   Tagged a ()
+    g :: forall a -> Tagged a ()
+
+    data T = T
+
+    a = f @T
+    b = g  T
+
+  In ``f @T``, we refer to the type constructor, but in ``g T`` we refer to the
+  data constructor.
+
+  This issue is resolved by using ``-Werror=punning``.
 
 Costs and Drawbacks
 -------------------
@@ -377,6 +392,9 @@ Alternatives
 
 * Keep types and terms forever different by not supporting visible ``forall``
   in terms.
+
+* Include the proposed functionality in ``ExplicitForAll`` instead of
+  introducing a new extension.
 
 * The extension name could use different capitalization or pluralization
   (``VisibleForall``, ``VisibleForalls``, ``VisibleForAlls``). The proposed
