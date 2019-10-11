@@ -256,9 +256,9 @@ To summarize, there are three reasons to make this change:
 Proposed Change Specification
 -----------------------------
 
-* Add a new language extension, ``VisibleForall``.
+* Add a new language extension, ``VisibleForAll``.
 
-* When ``VisibleForall`` is in effect, lift the restriction that the ``forall a
+* When ``VisibleForAll`` is in effect, lift the restriction that the ``forall a
   ->`` quantifier cannot be used in terms.
 
 * In terms, ``forall a ->`` is an irrelevant quantifier.
@@ -308,7 +308,7 @@ Proposed Change Specification
     there's a direct type-level equivalent, and their use is an error
     otherwise.
 
-* When ``VisibleForall`` is in effect, make ``forall`` a keyword at the term
+* When ``VisibleForAll`` is in effect, make ``forall`` a keyword at the term
   level. Add a warning ``-Widentifier-forall``, included in ``-Wcompat``, which
   warns on identifiers named ``forall``. In three releases, make ``forall`` a
   keyword everywhere.
@@ -377,6 +377,13 @@ Alternatives
 
 * Keep types and terms forever different by not supporting visible ``forall``
   in terms.
+
+* The extension name could use different capitalization or pluralization
+  (``VisibleForall``, ``VisibleForalls``, ``VisibleForAlls``). The proposed
+  variant is consistent with ``ExplicitForAll``.
+
+* We could guard type-level uses of visible ``forall`` behind the
+  ``VisibleForAll`` extension flag. This would break existing code.
 
 Unresolved Questions
 --------------------
