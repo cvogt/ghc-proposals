@@ -417,6 +417,26 @@ Alternatives
   the expense of the other two (language consistency and paving the ground for
   dependent types).
 
+* We could repurpose ``@`` as a syntactic marker that indicates types occurring
+  within terms. That is, while ``forall x ->`` is a compulsory parameter and
+  ``forall x.`` is not, the use sites would be ``f @Int`` in both cases.
+
+  The criticism from the previous alternative applies as well:
+
+  * it creates more syntactic noise
+  * it is inconsistent with what we have in types where we do not need a marker
+  * it does not move us towards pi-types
+
+  In addition to that, there's another issue:
+
+  * The dual purpose of ``@`` as both a visibility override and a namespace
+    specifier would lead to unwanted interference between ``forall x.`` and
+    ``forall x ->``. For example, given ``f :: forall k. forall (a::k) ->
+    blah``, it wouldn't be possible to specify ``a=Int`` as ``f @Int``;
+    one would have to write ``f @_ @Int`` or change the type of ``f`` to ``f
+    :: forall {k}. forall (a::k) -> blah``.
+
+
 Unresolved Questions
 --------------------
 
