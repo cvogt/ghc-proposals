@@ -316,18 +316,6 @@ Proposed Change Specification
   and ``forall a -> b``, so that these constructs can be reinterpreted as
   types.
 
-Meta: Term/Type Unification Policy
-----------------------------------
-
-Reinterpretation of terms as types is to be considered a transitional technique
-with the eventual goal of complete unification of terms and types. Hence, by
-accepting this proposal, the committee sets a course for the term/type unification.
-To facilitate this process, we establish a policy that non-breaking changes
-that simply bridge the gap between terms and types (such as promotion of
-``Char``, type-level ``if then else``, etc) do not require the proposal
-process. A merge request is eligible for this shortcut if at least two GHC
-Steering Committee members review it and declare so.
-
 Examples
 --------
 
