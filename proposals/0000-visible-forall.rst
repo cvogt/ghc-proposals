@@ -436,12 +436,12 @@ Unresolved Questions
 * Do we parse ``case ... of x -> y -> z`` as ``case ... of (x -> y) -> z``
   or ``case ... of x -> (y -> z)``, or do we require parentheses to disambiguate?
 
-  The ``case ... of (x -> y) -> z`` interpretation is not feasible, as it would require
-  infinite lookahead (not supported by ``happy``), but the decision between the error
-  and the ``case ... of x -> (y -> z)`` interpretation is rather arbitrary.
+  * The ``case ... of (x -> y) -> z`` interpretation is difficult to implement due to
+    the nature of GHC's parser inner workings. This makes it the least attractive option.
 
-  The current prototype implementation parses it as ``case ... of x -> (y -> z)``,
-  but it wouldn't be hard to make it either a warning or an error.
+  * The ``case ... of x -> (y -> z)`` interpretation has been implemented in a prototype.
+    However, the user might find it surprising. It wouldn't be hard to make it
+    either a warning or an error.
 
 Implementation Plan
 -------------------
