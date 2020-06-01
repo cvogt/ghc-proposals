@@ -428,7 +428,20 @@ Alternatives
 Unresolved Questions
 --------------------
 
-None at the moment.
+* When ``ViewPatterns`` are disabled, should we interpret ``f (a -> b) = ...``
+  as a view pattern and ask the user to enable the extension, or as ``f ((->) a
+  b) = ...``? Possible solution: interpret as ``f ((->) a b) = ...`` but issue
+  a warning.
+
+* Do we parse ``case ... of x -> y -> z`` as ``case ... of (x -> y) -> z``
+  or ``case ... of x -> (y -> z)``, or do we require parentheses to disambiguate?
+
+  The ``case ... of (x -> y) -> z`` interpretation is not feasible, as it would require
+  infinite lookahead (not supported by ``happy``), but the decision between the error
+  and the ``case ... of x -> (y -> z)`` interpretation is rather arbitrary.
+
+  The current prototype implementation parses it as ``case ... of x -> (y -> z)``,
+  but it wouldn't be hard to make it either a warning or an error.
 
 Implementation Plan
 -------------------
