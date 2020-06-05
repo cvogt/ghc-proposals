@@ -14,10 +14,6 @@ Visible ``forall`` in types of terms
 We propose to allow visible irrelevant dependent quantification, written as
 ``forall x ->``, in types of terms.
 
-NB. This proposal assumes that the `"Extend term-level lookup rules"
-<https://github.com/ghc-proposals/ghc-proposals/pull/270>`_
-proposal has been accepted.
-
 Background
 ----------
 
@@ -263,9 +259,11 @@ Proposed Change Specification
 
 * In types of terms, ``forall a ->`` is an irrelevant quantifier.
 
-* Parsing and name resolution are not affected. Given ``f :: forall a -> t``,
-  while ``x`` in ``f x`` is a type, it is parsed and renamed as a term, and
-  then reinterpreted as a type:
+* The name resolution rules are extended: when looking up a term-level identifier
+  fails, look for a type-level identifier as fallback.
+
+* Given ``f :: forall a -> t``, the ``x`` in ``f x`` is parsed and renamed as a
+  term, but then reinterpreted as a type:
 
   * A data constructor ``MkT`` is reinterpreted as a promoted data constructor
     ``MkT`` and requires the ``DataKinds`` extension.
@@ -310,7 +308,8 @@ Proposed Change Specification
 * When ``VisibleForAll`` is in effect, make ``forall`` a keyword at the term
   level. Add a warning ``-Widentifier-forall``, included in ``-Wcompat``, which
   warns on identifiers named ``forall``. In three releases, make ``forall`` a
-  keyword everywhere.
+  keyword everywhere, regardless of enabled extensions (same motivation as `#193
+  <https://github.com/ghc-proposals/ghc-proposals/blob/master/proposals/0193-forall-keyword.rst>`_).
 
 * Extend the term-level syntax with ``a -> b``, ``a => b``, ``forall a. b``,
   and ``forall a -> b``, so that these constructs can be reinterpreted as
@@ -368,7 +367,8 @@ Effect and Interactions
   In ``f @T``, we refer to the type constructor, but in ``g T`` we refer to the
   data constructor.
 
-  This issue is resolved by using ``-Werror=punning``.
+  This issue can be resolved by using ``-Werror=punning`` described in `#270
+  <https://github.com/ghc-proposals/ghc-proposals/pull/270>`_.
 
 Costs and Drawbacks
 -------------------
